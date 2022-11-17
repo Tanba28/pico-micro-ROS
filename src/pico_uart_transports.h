@@ -11,7 +11,6 @@ extern "C" {
 void setCustomTransport();
 
 extern int clock_gettime(clockid_t unused, struct timespec *tp);
-extern void usleep(uint64_t us);
 
 #ifdef	__cplusplus
 }

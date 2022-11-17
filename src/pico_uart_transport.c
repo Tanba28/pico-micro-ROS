@@ -22,10 +22,10 @@ void setCustomTransport(){
 	);
 }
 
-void usleep(uint64_t us)
-{
-    sleep_us(us);
-}
+// void usleep(uint64_t us)
+// {
+//     sleep_us(us);
+// }
 
 int clock_gettime(clockid_t unused, struct timespec *tp)
 {

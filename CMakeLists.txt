@@ -15,6 +15,7 @@ add_compile_options(-Wall
 )
 
 link_directories(libmicroros)
+add_subdirectory(./freertos)
 add_subdirectory(./src)
 
 add_subdirectory(./example)
