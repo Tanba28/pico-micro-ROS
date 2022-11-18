@@ -1,6 +1,6 @@
-add_executable(example main.cpp float_talker.cpp)
+add_executable(example main.cpp float_talker.cpp posix.c)
 
-target_link_libraries(example pico-microros-uart pico_stdlib hardware_i2c freertos)
+target_link_libraries(example pico-microros-uart freertos pico_stdlib )
 
 pico_enable_stdio_usb(example 1)
 pico_enable_stdio_uart(example 0)
