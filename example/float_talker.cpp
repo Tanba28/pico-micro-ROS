@@ -9,6 +9,7 @@
 
 #include "microros_base.hpp"
 
+#include "pico_uart_transports.h"
 
 // Task Handler
 FloatTalkerTask *floattalker;
@@ -24,25 +25,28 @@ void callback(rcl_timer_t *timer, int64_t last_call_time){
 
 // Task Constructor
 FloatTalkerTask::FloatTalkerTask():
-    TaskBase("float_talker_task",1,1024),
-    publisher(MicroRosPublisher("float_talker","","topic",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32))),
-    timer(MicroRosTimer(&publisher,RCL_MS_TO_NS(100),callback)),
-    executor(MicroRosExecutor(&publisher,1)){
-
-    executor.add_timer(&timer);
-
-    floattalker->msg.data = 0;
+    TaskBase("float_talker_task",1,1024){
 }
 
 // Publish Wrapper
 void FloatTalkerTask::publish(){
-    publisher.publish(&msg);
+    publisher->publish(&msg);
 }
 
 // Task
 void FloatTalkerTask::task(){
+    setCustomTransport();
+
+    publisher = new MicroRosPublisher("float_talker","","topic",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32));
+    timer = new MicroRosTimer(publisher,RCL_MS_TO_NS(10),callback);
+    executor = new MicroRosExecutor(publisher,1);
+
+    executor->add_timer(timer);
+
+    floattalker->msg.data = 0;
+
     // Publisher execute
-    executor.execute();
+    executor->execute();
 
     for(;;){
 

@@ -14,8 +14,6 @@ int main()
 
     gpio_put(LED_PIN, 1);
 
-    setCustomTransport();
-
     floattalker = new FloatTalkerTask();
 
     floattalker->create_task();

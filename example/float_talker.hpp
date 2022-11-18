@@ -52,9 +52,9 @@ class FloatTalkerTask : public TaskBase{
         void publish();
 
     private:
-        MicroRosPublisher publisher;
-        MicroRosTimer timer;
-        MicroRosExecutor executor;
+        MicroRosPublisher *publisher;
+        MicroRosTimer *timer;
+        MicroRosExecutor *executor;
 
         virtual void task();
 };
