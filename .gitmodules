@@ -1,0 +1,3 @@
+[submodule "pico-FreeRTOS"]
+	path = pico-FreeRTOS
+	url = https://github.com/Tanba28/pico-FreeRTOS.git
