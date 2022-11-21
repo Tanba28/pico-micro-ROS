@@ -18,7 +18,7 @@ FloatTalkerTask *floattalker;
 void callback(rcl_timer_t *timer, int64_t last_call_time){
     gpio_put(PICO_DEFAULT_LED_PIN, !gpio_get(PICO_DEFAULT_LED_PIN));
 
-    floattalker->msg.data = floattalker->msg.data + 0.1;
+    floattalker->msg.data = xTaskGetTickCount();
 
     floattalker->publish();
 }
@@ -36,7 +36,7 @@ void FloatTalkerTask::publish(){
 // Task
 void FloatTalkerTask::task(){
     publisher = new MicroRosPublisher("float_talker","","topic",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32));
-    timer = new MicroRosTimer(publisher,RCL_MS_TO_NS(20),callback);
+    timer = new MicroRosTimer(publisher,RCL_MS_TO_NS(10),callback);
     executor = new MicroRosExecutor(publisher,1);
 
     executor->add_timer(timer);

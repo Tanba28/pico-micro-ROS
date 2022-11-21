@@ -5,6 +5,7 @@
 
 #include <uxr/client/profile/transport/custom/custom_transport.h>
 
+#include "hardware/uart.h"
 class Transport{
     public:
         Transport();        
@@ -26,10 +27,25 @@ class StdioTransport : public Transport {
         StdioTransport();
 
     protected:
-        virtual bool open();
-        virtual bool close();
-        virtual size_t write(const uint8_t *buf, size_t len, uint8_t *errcode);
-        virtual size_t read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode);
+        bool open() override;
+        bool close() override;
+        size_t write(const uint8_t *buf, size_t len, uint8_t *errcode) override;
+        size_t read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode) override;
 };
 
-#endif //MICRO_ROS_PICOSDK
+class UartTransport : public Transport {
+    public:
+        UartTransport(uart_inst_t *_uart_id,uint _baudrate);
+
+    protected:
+        bool open() override;
+        bool close() override;
+        size_t write(const uint8_t *buf, size_t len, uint8_t *errcode) override;
+        size_t read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode) override;
+
+    private:
+        uart_inst_t *uart_id;
+        uint baudrate;
+};
+
+#endif
