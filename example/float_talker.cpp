@@ -25,7 +25,7 @@ void callback(rcl_timer_t *timer, int64_t last_call_time){
 
 // Task Constructor
 FloatTalkerTask::FloatTalkerTask():
-    TaskBase("float_talker_task",1,2048){
+    TaskBase("float_talker_task",2,4096){
 }
 
 // Publish Wrapper

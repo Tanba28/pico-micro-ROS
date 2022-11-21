@@ -16,6 +16,7 @@ int main()
     gpio_put(LED_PIN, 1);
 
     StdioTransport transport = StdioTransport();
+    (void) transport;
 
     floattalker = new FloatTalkerTask();
 
