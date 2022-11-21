@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include "microros_base.hpp"
 
+#include "FreeRTOS.h"
 
 MicroRosNode::MicroRosNode(const char *node_name,const char *name_space){
     allocator = rcl_get_default_allocator();

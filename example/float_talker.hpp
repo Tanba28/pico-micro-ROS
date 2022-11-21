@@ -26,6 +26,6 @@ class FloatTalkerTask : public TaskBase{
         MicroRosTimer *timer;
         MicroRosExecutor *executor;
 
-        virtual void task();
+        void task() override;
 };
 #endif
