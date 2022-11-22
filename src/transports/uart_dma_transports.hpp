@@ -39,7 +39,5 @@ class UartDmaTransport : public Transport {
 
         SemaphoreHandle_t uart_rx_irq_semaphor;
         SemaphoreHandle_t uart_tx_irq_semaphor;
-        SemaphoreHandle_t uart_rx_semaphor;
-        SemaphoreHandle_t uart_tx_semaphor;
 };
 #endif

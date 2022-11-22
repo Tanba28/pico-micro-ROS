@@ -4,6 +4,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "rmw_microros/rmw_microros.h"
+
 bool RCCHECK(rcl_ret_t ret){
     if (ret != RCL_RET_OK){
         printf("Failed status on %d: %d\n",__LINE__,(int)ret);
@@ -14,6 +16,8 @@ bool RCCHECK(rcl_ret_t ret){
     return true;
 }
 MicroRosContext::MicroRosContext(){
+    RCCHECK(rmw_uros_ping_agent(1000, 120));
+
     init_options = rcl_get_zero_initialized_init_options();
     RCCHECK(rcl_init_options_init(&init_options,rcutils_get_default_allocator()));
 
@@ -31,13 +35,6 @@ rcl_context_t* MicroRosContext::getContext(){
 }
 
 MicroRosNode::MicroRosNode(MicroRosContext *context,const char *node_name,const char *name_space){
-    // rcl_ret_t ret = rmw_uros_ping_agent(1000, 120);
-
-    // if (ret != RCL_RET_OK)
-    // {
-    //     return;
-    // }
-    
     node = rcl_get_zero_initialized_node();
     node_options = rcl_node_get_default_options();
     RCCHECK(rcl_node_init(&node,node_name,name_space,context->getContext(),&node_options));
@@ -54,7 +51,7 @@ MicroRosPublisher::MicroRosPublisher(MicroRosNode *_node,const char *topic_name,
     :node(_node->getNode()){
     publisher = rcl_get_zero_initialized_publisher();
     pub_options = rcl_publisher_get_default_options();
-
+    
     RCCHECK(rcl_publisher_init(
         &publisher,
         node,
@@ -77,7 +74,7 @@ MicroRosPublisher::~MicroRosPublisher(){
 void MicroRosPublisher::publish(const void *ros_message){
     rcl_ret_t ret = rcl_publish(&publisher,ros_message,NULL);
     if (ret != RCL_RET_OK){
-        printf("Failed status on %d: %d\n",__LINE__,(int)ret);
+        printf("Failed publish on %d: %d\n",__LINE__,(int)ret);
         return;
     }
 }

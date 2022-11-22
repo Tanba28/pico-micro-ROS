@@ -66,8 +66,6 @@ void UartDmaTransport::initialize(){
     gpio_set_function(gpio_tx,GPIO_FUNC_UART);
     gpio_set_function(gpio_rx,GPIO_FUNC_UART);
 
-    uart_rx_semaphor = xSemaphoreCreateBinary();
-    uart_tx_semaphor = xSemaphoreCreateBinary();
     uart_rx_irq_semaphor = xSemaphoreCreateBinary();
     uart_tx_irq_semaphor = xSemaphoreCreateBinary();
 
@@ -114,9 +112,6 @@ void UartDmaTransport::initialize(){
     irq_add_shared_handler(DMA_IRQ_0,rxDmaHandler,PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
     irq_set_enabled(DMA_IRQ_0,true);
 
-    xSemaphoreGive(uart_tx_semaphor);
-    xSemaphoreGive(uart_rx_semaphor);
-
     init_flag = true;
 }
 
@@ -147,29 +142,18 @@ bool UartDmaTransport::close(){
     return true;
 }
 size_t UartDmaTransport::write(const uint8_t *buf, size_t len, uint8_t *errcode){
-    xSemaphoreTake(uart_tx_semaphor,portMAX_DELAY);
-
     dma_channel_set_read_addr(tx_dma_chan,buf,false);
     dma_channel_set_trans_count(tx_dma_chan,len,true);
 
     xSemaphoreTake(uart_tx_irq_semaphor,portMAX_DELAY);
-    xSemaphoreGive(uart_tx_semaphor);
 
     return len;
 }
 size_t UartDmaTransport::read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode){
-    if(xSemaphoreTake(uart_rx_semaphor,pdMS_TO_TICKS(timeout))){
-        dma_channel_set_write_addr(rx_dma_chan,buf,false);
-        dma_channel_set_trans_count(rx_dma_chan,len,true);
+    dma_channel_set_write_addr(rx_dma_chan,buf,false);
+    dma_channel_set_trans_count(rx_dma_chan,len,true);
 
-        xSemaphoreTake(uart_rx_irq_semaphor,pdMS_TO_TICKS(timeout));
-        xSemaphoreGive(uart_rx_semaphor);
+    xSemaphoreTake(uart_rx_irq_semaphor,pdMS_TO_TICKS(timeout));
 
-        return len;
-    }
-    else{
-        return 0;
-    }
-
-    
+    return len;    
 }

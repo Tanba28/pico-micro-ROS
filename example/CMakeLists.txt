@@ -1,4 +1,4 @@
-add_executable(example main.cpp float_talker.cpp posix.c)
+add_executable(example main.cpp microros_task.cpp posix.c)
 
 target_link_libraries(example pico-microros-uart freertos pico_stdlib )
 
