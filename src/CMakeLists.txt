@@ -16,7 +16,7 @@ target_link_libraries(pico-microros-uart
     )
 
 target_include_directories(pico-microros-uart
+    PUBLIC .
     PUBLIC ${PROJECT_SOURCE_DIR}/libmicroros/include
-    PUBLIC ${PROJECT_SOURCE_DIR}/include
     PUBLIC ${PROJECT_SOURCE_DIR}/src/transports
     )

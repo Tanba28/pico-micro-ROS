@@ -2,98 +2,82 @@
 #include "microros_base.hpp"
 
 #include "FreeRTOS.h"
+#include "task.h"
 
-MicroRosNode::MicroRosNode(const char *node_name,const char *name_space){
-    allocator = rcl_get_default_allocator();
-
-    rcl_ret_t ret = rmw_uros_ping_agent(1000, 120);
-
-    if (ret != RCL_RET_OK)
-    {
-        return;
+bool RCCHECK(rcl_ret_t ret){
+    if (ret != RCL_RET_OK){
+        printf("Failed status on %d: %d\n",__LINE__,(int)ret);
+        vTaskDelay(1000);
+        vTaskSuspend(NULL);
+        return false;
     }
-
-    rclc_support_init(&support,0,NULL,&allocator);
-
-    rclc_node_init_default(&node,node_name,name_space,&support);
+    return true;
 }
+MicroRosContext::MicroRosContext(){
+    init_options = rcl_get_zero_initialized_init_options();
+    RCCHECK(rcl_init_options_init(&init_options,rcutils_get_default_allocator()));
+
+    context = rcl_get_zero_initialized_context();
+    RCCHECK(rcl_init(0,NULL,&init_options,&context));
+    RCCHECK(rcl_init_options_fini(&init_options));
+}
+
+MicroRosContext::~MicroRosContext(){
+    RCCHECK(rcl_context_fini(&context));
+}
+
+rcl_context_t* MicroRosContext::getContext(){
+    return &context;
+}
+
+MicroRosNode::MicroRosNode(MicroRosContext *context,const char *node_name,const char *name_space){
+    // rcl_ret_t ret = rmw_uros_ping_agent(1000, 120);
+
+    // if (ret != RCL_RET_OK)
+    // {
+    //     return;
+    // }
+    
+    node = rcl_get_zero_initialized_node();
+    node_options = rcl_node_get_default_options();
+    RCCHECK(rcl_node_init(&node,node_name,name_space,context->getContext(),&node_options));
+}
+
 MicroRosNode::~MicroRosNode(){
-    rcl_ret_t ret = rcl_node_fini(&node);
-    if (ret != RCL_RET_OK)
-    {
-        return;
-    }
-}
-rcl_allocator_t* MicroRosNode::get_allocator(){
-    return &allocator;
-}
-rclc_support_t* MicroRosNode::get_support(){
-    return &support;
-}
-rcl_context_t* MicroRosNode::get_support_context(){
-    return &support.context;
+    RCCHECK(rcl_node_fini(&node));
 }
 
-MicroRosPublisher::MicroRosPublisher(const char *node_name,const char *name_space, const char *topic_name,const rosidl_message_type_support_t *type_support):MicroRosNode(node_name,name_space){
-    rclc_publisher_init_default(
+rcl_node_t* MicroRosNode::getNode(){
+    return &node;
+}
+MicroRosPublisher::MicroRosPublisher(MicroRosNode *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node->getNode()){
+    publisher = rcl_get_zero_initialized_publisher();
+    pub_options = rcl_publisher_get_default_options();
+
+    RCCHECK(rcl_publisher_init(
         &publisher,
-        &node,
+        node,
         type_support,
-        topic_name);
-}
-MicroRosPublisher::~MicroRosPublisher(){
-    rcl_ret_t ret = rcl_publisher_fini(&publisher, &node);
+        topic_name,
+        &pub_options
+    ));
 
-    if (ret != RCL_RET_OK)
-    {
-        return;
-    }
+    // rclc_publisher_init_default(
+    //     &publisher,
+    //     node,
+    //     type_support,
+    //     topic_name);
+}
+
+MicroRosPublisher::~MicroRosPublisher(){
+    RCCHECK(rcl_publisher_fini(&publisher, node));
 }
 
 void MicroRosPublisher::publish(const void *ros_message){
     rcl_ret_t ret = rcl_publish(&publisher,ros_message,NULL);
-    if (ret != RCL_RET_OK)
-    {
+    if (ret != RCL_RET_OK){
+        printf("Failed status on %d: %d\n",__LINE__,(int)ret);
         return;
     }
 }
-
-
-rcl_publisher_t* MicroRosPublisher::get_publisher(){
-    return &publisher;
-}
-
-
-MicroRosTimer::MicroRosTimer(MicroRosNode *node,uint64_t timeout_ns,void (*callback)(rcl_timer_t*,int64_t)){
-    rclc_timer_init_default(
-        &timer,
-        node->get_support(),
-        timeout_ns,
-        callback);
-}
-rcl_timer_t* MicroRosTimer::get_timer(){
-    return &timer;
-}
-
-MicroRosExecutor::MicroRosExecutor(MicroRosNode *node,uint8_t num_handles){
-    rcl_ret_t ret = rclc_executor_init(&executor, node->get_support_context(), num_handles, node->get_allocator());
-    
-    if (ret != RCL_RET_OK)
-    {
-        return;
-    }
-}
-MicroRosExecutor::~MicroRosExecutor(){
-    rclc_executor_fini(&executor);
-}
-void MicroRosExecutor::add_timer(MicroRosTimer *timer){
-    rcl_ret_t ret = rclc_executor_add_timer(&executor, timer->get_timer());
-    if (ret != RCL_RET_OK)
-    {
-        return;
-    }
-}
-void MicroRosExecutor::execute(){
-    rclc_executor_spin(&executor);
-}
-

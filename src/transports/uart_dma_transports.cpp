@@ -12,7 +12,6 @@
 
 #include "task_base.hpp"
 
-
 UartDmaTransport *uart_dma_transports;
 
 static void txDmaHandler(){
@@ -22,7 +21,7 @@ static void txDmaHandler(){
         
         higher_priority_task_woken = pdFALSE;   
         
-        xSemaphoreGiveFromISR(uart_dma_transports->getTxSemaphor(), &higher_priority_task_woken);
+        xSemaphoreGiveFromISR(uart_dma_transports->getTxIrqSemaphor(), &higher_priority_task_woken);
         
         portEND_SWITCHING_ISR( higher_priority_task_woken );    
     }
@@ -35,7 +34,7 @@ static void rxDmaHandler(){
 
         higher_priority_task_woken = pdFALSE;   
 
-        xSemaphoreGiveFromISR(uart_dma_transports->getRxSemaphor(), &higher_priority_task_woken);
+        xSemaphoreGiveFromISR(uart_dma_transports->getRxIrqSemaphor(), &higher_priority_task_woken);
 
         portEND_SWITCHING_ISR( higher_priority_task_woken );
     } 
@@ -46,11 +45,11 @@ UartDmaTransport::UartDmaTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gp
 
 }
 
-SemaphoreHandle_t UartDmaTransport::getRxSemaphor(){
-    return uart_rx_semaphor;
+SemaphoreHandle_t UartDmaTransport::getRxIrqSemaphor(){
+    return uart_rx_irq_semaphor;
 }
-SemaphoreHandle_t UartDmaTransport::getTxSemaphor(){
-    return uart_tx_semaphor;
+SemaphoreHandle_t UartDmaTransport::getTxIrqSemaphor(){
+    return uart_tx_irq_semaphor;
 }
 int UartDmaTransport::getRxDmaChan(){
     return rx_dma_chan;
@@ -59,13 +58,18 @@ int UartDmaTransport::getTxDmaChan(){
     return tx_dma_chan;
 }
 
-bool UartDmaTransport::open(){
+bool UartDmaTransport::isInitialize(){
+    return init_flag;
+}
+void UartDmaTransport::initialize(){
     uart_init(uart_id, baudrate);
     gpio_set_function(gpio_tx,GPIO_FUNC_UART);
     gpio_set_function(gpio_rx,GPIO_FUNC_UART);
 
     uart_rx_semaphor = xSemaphoreCreateBinary();
     uart_tx_semaphor = xSemaphoreCreateBinary();
+    uart_rx_irq_semaphor = xSemaphoreCreateBinary();
+    uart_tx_irq_semaphor = xSemaphoreCreateBinary();
 
     // Tx DMA Confuguration
     tx_dma_chan = dma_claim_unused_channel(true);
@@ -110,10 +114,13 @@ bool UartDmaTransport::open(){
     irq_add_shared_handler(DMA_IRQ_0,rxDmaHandler,PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
     irq_set_enabled(DMA_IRQ_0,true);
 
-    return true;
+    xSemaphoreGive(uart_tx_semaphor);
+    xSemaphoreGive(uart_rx_semaphor);
+
+    init_flag = true;
 }
 
-bool UartDmaTransport::close(){
+void UartDmaTransport::deinitialize(){
     uart_deinit(uart_id);
     dma_channel_set_irq0_enabled(tx_dma_chan,false);
     dma_channel_set_irq0_enabled(rx_dma_chan,false);
@@ -122,19 +129,47 @@ bool UartDmaTransport::close(){
     dma_channel_unclaim(tx_dma_chan);
     dma_channel_unclaim(rx_dma_chan);
 
+    init_flag = false;
+}
+
+bool UartDmaTransport::open(){
+    if(!isInitialize()){
+        initialize();
+    }
+
+    return true;
+}
+
+bool UartDmaTransport::close(){
+    if(isInitialize()){
+        deinitialize();
+    }
     return true;
 }
 size_t UartDmaTransport::write(const uint8_t *buf, size_t len, uint8_t *errcode){
+    xSemaphoreTake(uart_tx_semaphor,portMAX_DELAY);
+
     dma_channel_set_read_addr(tx_dma_chan,buf,false);
     dma_channel_set_trans_count(tx_dma_chan,len,true);
-    xSemaphoreTake(uart_tx_semaphor,portMAX_DELAY);
+
+    xSemaphoreTake(uart_tx_irq_semaphor,portMAX_DELAY);
+    xSemaphoreGive(uart_tx_semaphor);
 
     return len;
 }
 size_t UartDmaTransport::read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode){
-    dma_channel_set_write_addr(rx_dma_chan,buf,false);
-    dma_channel_set_trans_count(rx_dma_chan,len,true);
-    xSemaphoreTake(uart_rx_semaphor,timeout*portMAX_DELAY);
+    if(xSemaphoreTake(uart_rx_semaphor,pdMS_TO_TICKS(timeout))){
+        dma_channel_set_write_addr(rx_dma_chan,buf,false);
+        dma_channel_set_trans_count(rx_dma_chan,len,true);
 
-    return len;
+        xSemaphoreTake(uart_rx_irq_semaphor,pdMS_TO_TICKS(timeout));
+        xSemaphoreGive(uart_rx_semaphor);
+
+        return len;
+    }
+    else{
+        return 0;
+    }
+
+    
 }

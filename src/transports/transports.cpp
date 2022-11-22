@@ -21,12 +21,17 @@ Transport::Transport(){
         readEntryPoint
     );
 
-    rcutils_allocator_t allocators = rcutils_get_default_allocator();
+    rcl_allocator_t  allocators = rcutils_get_zero_initialized_allocator();
     allocators.allocate = freertosAllocate;
     allocators.deallocate = freertosDeallocate;
+    allocators.reallocate = freertosReallocate;
+    allocators.zero_allocate = freertosZeroAllocate;
 
     rcl_ret_t ret = rcutils_set_default_allocator(&allocators);
-    if (ret != RCL_RET_OK){return;}
+    if (ret != RCL_RET_OK){
+        printf("Failed status on %d: %d",__LINE__,(int)ret);
+        return;
+    }
 }
 
 bool Transport::openEntryPoint(uxrCustomTransport *transport){
