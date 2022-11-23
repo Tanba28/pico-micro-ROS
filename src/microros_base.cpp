@@ -61,12 +61,6 @@ Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_typ
         topic_name,
         &pub_options
     ));
-
-    // rclc_publisher_init_default(
-    //     &publisher,
-    //     node,
-    //     type_support,
-    //     topic_name);
 }
 
 Publisher::~Publisher(){
@@ -81,4 +75,46 @@ void Publisher::publish(const void *ros_message){
     }
 }
 
+Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node->getNode()){
+    subscriber = rcl_get_zero_initialized_subscription();
+    sub_options = rcl_subscription_get_default_options();
+
+    RCCHECK(rcl_subscription_init(
+        &subscriber,
+        node,
+        type_support,
+        topic_name,
+        &sub_options
+    ));
+}
+
+rcl_subscription_t* Subscriber::getSubscriber(){
+    return &subscriber;
+}
+
+Executor::Executor(Context *_context,size_t num_hundle)
+    :context(_context->getContext()){
+    allocator = rcl_get_default_allocator();
+    RCCHECK(rclc_executor_init(
+        &executor,
+        context,
+        num_hundle,
+        &allocator
+    ));
+}
+
+void Executor::add_subscription(Subscriber *subscriber,void* msg,rclc_subscription_callback_t callback){
+    RCCHECK(rclc_executor_add_subscription(
+        &executor,
+        subscriber->getSubscriber(),
+        msg,
+        callback,
+        ON_NEW_DATA
+    ));
+}
+
+void Executor::spin_some(uint64_t timeout_ms){
+    rclc_executor_spin_some(&executor,timeout_ms);
+}
 }

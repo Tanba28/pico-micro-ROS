@@ -17,6 +17,8 @@
 class MicroRosContoller;
 class MicroRosNode;
 class MicroRosPublisher;
+class MicroRosSubscriber;
+class MicroRosExecutor;
 
 class MicroRosController : public MicroRos::Context,TaskBase{
     public:
@@ -38,6 +40,11 @@ class MicroRosNode : public MicroRos::Node{
     private:
         MicroRosPublisher * publisher;
         MicroRosPublisher * publisher2;
+
+        MicroRosSubscriber * subscriber;
+
+        MicroRosExecutor *executor;
+
 };
 
 class MicroRosPublisher : public MicroRos::Publisher{
@@ -47,6 +54,24 @@ class MicroRosPublisher : public MicroRos::Publisher{
         std_msgs__msg__Float32 msg;
 
         void publishRun();
+        
+    private:
+
+};
+
+class MicroRosSubscriber : public MicroRos::Subscriber{
+    public:
+        MicroRosSubscriber(MicroRos::Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+
+        std_msgs__msg__Float32 msg;
+        
+    private:
+
+};
+
+class MicroRosExecutor : public MicroRos::Executor{
+    public:
+        MicroRosExecutor(MicroRos::Context *context,size_t num_handle);
         
     private:
 
