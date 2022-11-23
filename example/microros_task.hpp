@@ -14,22 +14,41 @@
 
 #include "task_base.hpp"
 
-class MicroRosTask : public TaskBase{
-    public:
-        MicroRosTask(const char *_node_name, const char *_name_space);
+class MicroRosContoller;
+class MicroRosNode;
+class MicroRosPublisher;
 
-        std_msgs__msg__Float32 msg;
-        
-        void publish();
+class MicroRosController : public MicroRos::Context,TaskBase{
+    public:
+        MicroRosController();
 
     private:
-        MicroRosContext *context;
         MicroRosNode *node;
-        MicroRosPublisher *publisher;
 
-        const char *node_name;
-        const char *name_space;
-
+        // microRos用スレッドはひとつだけ
         void task() override;
+};
+
+class MicroRosNode : public MicroRos::Node{
+    public:
+        MicroRosNode(MicroRos::Context *context,const char *node_name,const char *name_space);
+
+        void nodeRun();
+
+    private:
+        MicroRosPublisher * publisher;
+        MicroRosPublisher * publisher2;
+};
+
+class MicroRosPublisher : public MicroRos::Publisher{
+    public:
+        MicroRosPublisher(MicroRos::Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+
+        std_msgs__msg__Float32 msg;
+
+        void publishRun();
+        
+    private:
+
 };
 #endif

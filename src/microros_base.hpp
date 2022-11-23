@@ -5,10 +5,12 @@
 
 bool RCCHECK(rcl_ret_t ret);
 
-class MicroRosContext{
+namespace MicroRos{
+
+class Context{
     public:
-        MicroRosContext();
-        ~MicroRosContext();
+        Context();
+        ~Context();
 
         rcl_context_t* getContext();
 
@@ -17,10 +19,10 @@ class MicroRosContext{
         rcl_context_t context;
 };
 
-class MicroRosNode{
+class Node{
     public:
-        MicroRosNode(MicroRosContext *context,const char *node_name,const char *name_space);
-        ~MicroRosNode();
+        Node(Context *context,const char *node_name,const char *name_space);
+        ~Node();
 
         rcl_node_t* getNode();
 
@@ -30,10 +32,10 @@ class MicroRosNode{
 };
 
 
-class MicroRosPublisher{
+class Publisher{
     public:
-        MicroRosPublisher(MicroRosNode *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
-        ~MicroRosPublisher();
+        Publisher(Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+        ~Publisher();
 
         void publish(const void *ros_message);
 
@@ -43,5 +45,8 @@ class MicroRosPublisher{
 
         rcl_node_t *node;
 };
+
+}
+
 
 #endif

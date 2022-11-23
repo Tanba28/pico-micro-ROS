@@ -15,7 +15,9 @@ bool RCCHECK(rcl_ret_t ret){
     }
     return true;
 }
-MicroRosContext::MicroRosContext(){
+namespace MicroRos{
+
+Context::Context(){
     RCCHECK(rmw_uros_ping_agent(1000, 120));
 
     init_options = rcl_get_zero_initialized_init_options();
@@ -26,28 +28,28 @@ MicroRosContext::MicroRosContext(){
     RCCHECK(rcl_init_options_fini(&init_options));
 }
 
-MicroRosContext::~MicroRosContext(){
+Context::~Context(){
     RCCHECK(rcl_context_fini(&context));
 }
 
-rcl_context_t* MicroRosContext::getContext(){
+rcl_context_t* Context::getContext(){
     return &context;
 }
 
-MicroRosNode::MicroRosNode(MicroRosContext *context,const char *node_name,const char *name_space){
+Node::Node(Context *context,const char *node_name,const char *name_space){
     node = rcl_get_zero_initialized_node();
     node_options = rcl_node_get_default_options();
     RCCHECK(rcl_node_init(&node,node_name,name_space,context->getContext(),&node_options));
 }
 
-MicroRosNode::~MicroRosNode(){
+Node::~Node(){
     RCCHECK(rcl_node_fini(&node));
 }
 
-rcl_node_t* MicroRosNode::getNode(){
+rcl_node_t* Node::getNode(){
     return &node;
 }
-MicroRosPublisher::MicroRosPublisher(MicroRosNode *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
     :node(_node->getNode()){
     publisher = rcl_get_zero_initialized_publisher();
     pub_options = rcl_publisher_get_default_options();
@@ -67,14 +69,16 @@ MicroRosPublisher::MicroRosPublisher(MicroRosNode *_node,const char *topic_name,
     //     topic_name);
 }
 
-MicroRosPublisher::~MicroRosPublisher(){
+Publisher::~Publisher(){
     RCCHECK(rcl_publisher_fini(&publisher, node));
 }
 
-void MicroRosPublisher::publish(const void *ros_message){
+void Publisher::publish(const void *ros_message){
     rcl_ret_t ret = rcl_publish(&publisher,ros_message,NULL);
     if (ret != RCL_RET_OK){
         printf("Failed publish on %d: %d\n",__LINE__,(int)ret);
         return;
     }
+}
+
 }

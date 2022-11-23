@@ -68,6 +68,8 @@ void UartDmaTransport::initialize(){
 
     uart_rx_irq_semaphor = xSemaphoreCreateBinary();
     uart_tx_irq_semaphor = xSemaphoreCreateBinary();
+    uart_rx_semaphor = xSemaphoreCreateBinary();
+    uart_tx_semaphor = xSemaphoreCreateBinary();
 
     // Tx DMA Confuguration
     tx_dma_chan = dma_claim_unused_channel(true);
@@ -154,6 +156,5 @@ size_t UartDmaTransport::read(uint8_t *buf, size_t len, int timeout, uint8_t *er
     dma_channel_set_trans_count(rx_dma_chan,len,true);
 
     xSemaphoreTake(uart_rx_irq_semaphor,pdMS_TO_TICKS(timeout));
-
-    return len;    
+    return len;   
 }

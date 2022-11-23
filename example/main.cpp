@@ -20,13 +20,15 @@ int main()
     gpio_put(LED_PIN, 1);
     stdio_init_all();
 
-    MicroRosTask microros_task = MicroRosTask("float_talker_1","");
+    // 初期設定はRTOS、DMAなし
+    UartTransport transport = UartTransport(uart0,460800);
+    (void) transport;
 
+    MicroRosController microros = MicroRosController();
+
+    // DMA有効化
     uart_dma_transports = new UartDmaTransport(uart0,460800,12,13);
     (void) uart_dma_transports;
-
-    microros_task.create_task();
-    // floattalker_2.create_task();
 
     vTaskStartScheduler();
 
