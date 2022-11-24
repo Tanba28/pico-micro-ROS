@@ -40,14 +40,13 @@ class MicroRosNode : public MicroRos::Node{
     private:
         // 使う機能を列挙する
         // 機能数制限
-        // pub:10 sub:5 service:1 client:1 history:4
+        // node:2 pub:10 sub:10 service:5 client:5 history:4
         MicroRosPublisher * publisher;
         MicroRosPublisher * publisher2;
 
         MicroRosSubscriber * subscriber;
 
         MicroRosExecutor *executor;
-
 };
 
 class MicroRosPublisher : public MicroRos::Publisher{

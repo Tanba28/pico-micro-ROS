@@ -3,6 +3,7 @@
 
 #include "rcl/rcl.h"
 #include "rclc/executor.h"
+#include "rclc_lifecycle/rclc_lifecycle.h"
 
 bool RCCHECK(rcl_ret_t ret);
 
@@ -22,7 +23,7 @@ class Context{
 
 class Node{
     public:
-        Node(Context *context,const char *node_name,const char *name_space);
+        Node(rcl_context_t *context,const char *node_name,const char *name_space);
         ~Node();
 
         rcl_node_t* getNode();
@@ -32,10 +33,28 @@ class Node{
         rcl_node_options_t node_options;
 };
 
+class LifeCycleNode : public Node{
+    public:
+        LifeCycleNode(rcl_context_t *context,const char *node_name,const char *name_space);
+
+        rclc_lifecycle_node_t* getLifeCycleNode();
+
+        void addStateServer(rclc_executor_t *lifecycle_executor);
+
+        void setConfigureCallback(int (* callback)(void));
+        void setActivateCallback(int (* callback)(void));
+        void setDeactivateCallback(int (* callback)(void));
+        void setCleanupCallback(int (* callback)(void));
+        
+    private:
+        rcl_lifecycle_state_machine_t state_macine;
+        rclc_lifecycle_node_t lifecycle_node;
+        rclc_lifecycle_service_context_t lifecycle_context;
+};
 
 class Publisher{
     public:
-        Publisher(Node *_node,const char *_topic_name,const rosidl_message_type_support_t *type_support);
+        Publisher(rcl_node_t *_node,const char *_topic_name,const rosidl_message_type_support_t *type_support);
         ~Publisher();
 
         void publish(const void *ros_message);
@@ -49,12 +68,13 @@ class Publisher{
 
 class Subscriber{
     public:
-        Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+        Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
         ~Subscriber();
 
         static void (*callback)(const void * ros_message);
 
-        rcl_subscription_t* getSubscriber();
+        void addExecutor(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback);
+
     private:
         rcl_subscription_t subscriber;
         rcl_subscription_options_s sub_options;
@@ -64,11 +84,12 @@ class Subscriber{
 
 class Executor{
     public:
-        Executor(Context *context,size_t num_hundle);
+        Executor(rcl_context_t *context,size_t num_hundle);
         ~Executor();
+
+        rclc_executor_t* getExecutor();
         
-        void add_subscription(Subscriber *subscriber,void* msg,rclc_subscription_callback_t callback);
-        void spin_some(uint64_t timeout_ms);
+        void spinSome(uint64_t timeout_ns);
 
     private:
         rclc_executor_t executor;

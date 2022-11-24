@@ -6,18 +6,8 @@
 
 #include "rmw_microros/rmw_microros.h"
 
-
+#define RCCHECK(ret) if(ret!=RCL_RET_OK){printf("Failed status on %d: %d\n",__LINE__,(int)ret);vTaskSuspend(NULL);}
 namespace MicroRos{
-
-bool RCCHECK(rcl_ret_t ret){
-    if (ret != RCL_RET_OK){
-        printf("Failed status on %d: %d\n",__LINE__,(int)ret);
-        vTaskDelay(1000);
-        vTaskSuspend(NULL);
-        return false;
-    }
-    return true;
-}
 
 Context::Context(){
     RCCHECK(rmw_uros_ping_agent(1000, 120));
@@ -38,10 +28,10 @@ rcl_context_t* Context::getContext(){
     return &context;
 }
 
-Node::Node(Context *context,const char *node_name,const char *name_space){
+Node::Node(rcl_context_t *context,const char *node_name,const char *name_space){
     node = rcl_get_zero_initialized_node();
     node_options = rcl_node_get_default_options();
-    RCCHECK(rcl_node_init(&node,node_name,name_space,context->getContext(),&node_options));
+    RCCHECK(rcl_node_init(&node,node_name,name_space,context,&node_options));
 }
 
 Node::~Node(){
@@ -51,8 +41,48 @@ Node::~Node(){
 rcl_node_t* Node::getNode(){
     return &node;
 }
-Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
-    :node(_node->getNode()){
+
+LifeCycleNode::LifeCycleNode(rcl_context_t *context,const char *node_name,const char *name_space):
+    Node(context,node_name,name_space){
+    state_macine = rcl_lifecycle_get_zero_initialized_state_machine();
+    rcl_allocator_t allocator = rcutils_get_default_allocator();
+
+    RCCHECK(rclc_make_node_a_lifecycle_node(
+        &lifecycle_node,
+        &node,
+        &state_macine,
+        &allocator,
+        true
+    ));
+}
+
+rclc_lifecycle_node_t* LifeCycleNode::getLifeCycleNode(){
+    return &lifecycle_node;
+}
+
+void LifeCycleNode::addStateServer(rclc_executor_t *lifecycle_executor){
+    lifecycle_context.lifecycle_node = &lifecycle_node;
+    RCCHECK(rclc_lifecycle_init_get_state_server(&lifecycle_context,lifecycle_executor));
+    RCCHECK(rclc_lifecycle_init_get_available_states_server(&lifecycle_context,lifecycle_executor));
+    RCCHECK(rclc_lifecycle_init_change_state_server(&lifecycle_context,lifecycle_executor));
+}
+
+void LifeCycleNode::setConfigureCallback(int (* callback)(void)){
+    rclc_lifecycle_register_on_configure(&lifecycle_node,callback);
+}
+void LifeCycleNode::setActivateCallback(int (* callback)(void)){
+    rclc_lifecycle_register_on_activate(&lifecycle_node,callback);
+}
+void LifeCycleNode::setDeactivateCallback(int (* callback)(void)){
+    rclc_lifecycle_register_on_deactivate(&lifecycle_node,callback);
+}
+void LifeCycleNode::setCleanupCallback(int (* callback)(void)){
+    rclc_lifecycle_register_on_cleanup(&lifecycle_node,callback);
+}
+
+
+Publisher::Publisher(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node){
     publisher = rcl_get_zero_initialized_publisher();
     pub_options = rcl_publisher_get_default_options();
     
@@ -77,8 +107,8 @@ void Publisher::publish(const void *ros_message){
     }
 }
 
-Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
-    :node(_node->getNode()){
+Subscriber::Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node){
     subscriber = rcl_get_zero_initialized_subscription();
     sub_options = rcl_subscription_get_default_options();
 
@@ -90,13 +120,18 @@ Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_t
         &sub_options
     ));
 }
-
-rcl_subscription_t* Subscriber::getSubscriber(){
-    return &subscriber;
+void Subscriber::addExecutor(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback){
+    RCCHECK(rclc_executor_add_subscription(
+        executor,
+        &subscriber,
+        msg,
+        callback,
+        ON_NEW_DATA
+    ));
 }
 
-Executor::Executor(Context *_context,size_t num_hundle)
-    :context(_context->getContext()){
+Executor::Executor(rcl_context_t *_context,size_t num_hundle)
+    :context(_context){
     allocator = rcl_get_default_allocator();
     RCCHECK(rclc_executor_init(
         &executor,
@@ -106,17 +141,11 @@ Executor::Executor(Context *_context,size_t num_hundle)
     ));
 }
 
-void Executor::add_subscription(Subscriber *subscriber,void* msg,rclc_subscription_callback_t callback){
-    RCCHECK(rclc_executor_add_subscription(
-        &executor,
-        subscriber->getSubscriber(),
-        msg,
-        callback,
-        ON_NEW_DATA
-    ));
+rclc_executor_t* Executor::getExecutor(){
+    return &executor;
 }
 
-void Executor::spin_some(uint64_t timeout_ms){
-    rclc_executor_spin_some(&executor,timeout_ms);
+void Executor::spinSome(uint64_t timeout_ns){
+    rclc_executor_spin_some(&executor,timeout_ns);
 }
 }
