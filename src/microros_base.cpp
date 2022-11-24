@@ -6,6 +6,9 @@
 
 #include "rmw_microros/rmw_microros.h"
 
+
+namespace MicroRos{
+
 bool RCCHECK(rcl_ret_t ret){
     if (ret != RCL_RET_OK){
         printf("Failed status on %d: %d\n",__LINE__,(int)ret);
@@ -15,7 +18,6 @@ bool RCCHECK(rcl_ret_t ret){
     }
     return true;
 }
-namespace MicroRos{
 
 Context::Context(){
     RCCHECK(rmw_uros_ping_agent(1000, 120));
