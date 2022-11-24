@@ -4,7 +4,7 @@
 #include "pico/stdlib.h"
 
 #include <rcl/rcl.h>
-#include <std_msgs/msg/float32.h>
+#include <std_msgs/msg/int64.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -38,6 +38,9 @@ class MicroRosNode : public MicroRos::Node{
         void nodeRun();
 
     private:
+        // 使う機能を列挙する
+        // 機能数制限
+        // pub:10 sub:5 service:1 client:1 history:4
         MicroRosPublisher * publisher;
         MicroRosPublisher * publisher2;
 
@@ -51,7 +54,7 @@ class MicroRosPublisher : public MicroRos::Publisher{
     public:
         MicroRosPublisher(MicroRos::Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
 
-        std_msgs__msg__Float32 msg;
+        std_msgs__msg__Int64 msg;
 
         void publishRun();
         
@@ -63,7 +66,7 @@ class MicroRosSubscriber : public MicroRos::Subscriber{
     public:
         MicroRosSubscriber(MicroRos::Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support);
 
-        std_msgs__msg__Float32 msg;
+        std_msgs__msg__Int64 msg;
         
     private:
 

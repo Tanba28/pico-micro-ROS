@@ -1,7 +1,8 @@
 #include "microros_task.hpp"
 
 #include <rcl/rcl.h>
-#include <std_msgs/msg/float32.h>
+#include <std_msgs/msg/int32.h>
+#include <rmw_microros/rmw_microros.h>
 
 #include "microros_base.hpp"
 
@@ -9,10 +10,10 @@
 #include "task.h"
 #include "semphr.h"
 
-uint8_t count = 0;
+uint16_t count = 0;
 static void _callback(const void * ros_message){
     count++;
-    const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32*)ros_message;
+    const std_msgs__msg__Int64 *msg = (const std_msgs__msg__Int64*)ros_message;
     printf("Hello World!%d data:%f\n",count,msg->data);
 }
 
@@ -26,23 +27,24 @@ TaskBase("microros_task",1,1024*16){
 void MicroRosController::task(){
     TickType_t last_wake_time;
 
+    rmw_uros_sync_session(1000);
+
+    last_wake_time = xTaskGetTickCount();
     for(;;){
-        last_wake_time = xTaskGetTickCount();
-        
 
         node->nodeRun();
 
         gpio_put(25, !gpio_get(25));
-        xTaskDelayUntil(&last_wake_time,pdMS_TO_TICKS(100));
+        xTaskDelayUntil(&last_wake_time,pdMS_TO_TICKS(10));
     }
 }
 
 MicroRosNode::MicroRosNode(MicroRos::Context *context,const char *node_name,const char *name_space):
     MicroRos::Node(context,node_name,name_space){
-    publisher = new MicroRosPublisher(this,"topic1",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32));
-    publisher2 = new MicroRosPublisher(this,"topic2",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32));
+    publisher = new MicroRosPublisher(this,"topic1",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64));
+    publisher2 = new MicroRosPublisher(this,"topic2",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64));
 
-    subscriber = new MicroRosSubscriber(this,"topic3",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32));
+    subscriber = new MicroRosSubscriber(this,"topic3",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64));
 
     executor = new MicroRosExecutor(context,1);
 
@@ -62,7 +64,8 @@ MicroRosPublisher::MicroRosPublisher(MicroRos::Node *node,const char *topic_name
 }
 
 void MicroRosPublisher::publishRun(){
-    msg.data = xTaskGetTickCount();
+
+    msg.data = rmw_uros_epoch_millis();
     publish(&msg);
 }
 
