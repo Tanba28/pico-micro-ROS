@@ -5,6 +5,7 @@
 #include <rmw_microros/rmw_microros.h>
 
 #include "microros_base.hpp"
+#include "hardware/watchdog.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -25,15 +26,22 @@ TaskBase("microros_task",1,1024*16){
 }
 
 void MicroRosController::task(){
+    uint64_t counter = 0;
     TickType_t last_wake_time;
 
     rmw_uros_sync_session(1000);
 
     last_wake_time = xTaskGetTickCount();
     for(;;){
+        watchdog_update();
+        
         node->nodeRun();
-        gpio_put(25, !gpio_get(25));
-        xTaskDelayUntil(&last_wake_time,pdMS_TO_TICKS(20));
+        if(counter%2==0){
+            gpio_put(25, !gpio_get(25));
+        }
+        xTaskDelayUntil(&last_wake_time,pdMS_TO_TICKS(10));
+
+        counter++;
     }
 }
 
