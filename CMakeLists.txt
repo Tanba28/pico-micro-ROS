@@ -14,11 +14,10 @@ add_compile_options(-Wall
 -Wno-maybe-uninitialized
 )
 
-link_directories(libmicroros)
-add_subdirectory(./src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 if(NOT DEFINED IS_ROOT_PROJECT)
     set(IS_ROOT_PROJECT true)
-    add_subdirectory(./pico-FreeRTOS)
-    add_subdirectory(./example)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/pico-FreeRTOS)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/example)
 endif()

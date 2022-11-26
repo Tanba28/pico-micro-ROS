@@ -7,6 +7,10 @@ add_library(pico-microros-uart
     transports/uart_dma_transports.cpp
 )
 
+target_link_directories(pico-microros-uart PUBLIC
+    ${PROJECT_SOURCE_DIR}/libmicroros
+)
+
 target_link_libraries(pico-microros-uart 
     pico_stdlib 
     hardware_dma
