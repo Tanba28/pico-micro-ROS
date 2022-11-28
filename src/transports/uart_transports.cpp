@@ -10,8 +10,8 @@ uart_id(_uart_id),baudrate(_baudrate),gpio_tx(_gpio_tx),gpio_rx(_gpio_rx){
 
 bool UartTransport::open(){
     uart_init(uart_id, baudrate);
-    gpio_set_function(12,GPIO_FUNC_UART);
-    gpio_set_function(13,GPIO_FUNC_UART);
+    gpio_set_function(gpio_tx,GPIO_FUNC_UART);
+    gpio_set_function(gpio_rx,GPIO_FUNC_UART);
     return true;
 }
 bool UartTransport::close(){
