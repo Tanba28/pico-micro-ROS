@@ -5,7 +5,7 @@
 
 class UartTransport : public Transport {
     public:
-        UartTransport(uart_inst_t *_uart_id,uint _baudrate);
+        UartTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx);
 
     protected:
         bool open() override;
@@ -16,6 +16,8 @@ class UartTransport : public Transport {
     private:
         uart_inst_t *uart_id;
         uint baudrate;
+        uint gpio_tx;
+        uint gpio_rx;
 };
 
 #endif

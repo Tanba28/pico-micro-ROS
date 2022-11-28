@@ -3,7 +3,8 @@
 #include "stdio.h"
 #include "pico/stdlib.h"
 
-UartTransport::UartTransport(uart_inst_t *_uart_id,uint _baudrate):uart_id(_uart_id),baudrate(_baudrate){
+UartTransport::UartTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx):
+uart_id(_uart_id),baudrate(_baudrate),gpio_tx(_gpio_tx),gpio_rx(_gpio_rx){
 
 }
 
