@@ -1,4 +1,4 @@
-add_library(pico-microros-uart
+add_library(pico-Micro-ROS
     allocators.c
     microros_base.cpp
     transports/transports.cpp
@@ -7,19 +7,19 @@ add_library(pico-microros-uart
     transports/uart_dma_transports.cpp
 )
 
-target_link_directories(pico-microros-uart PUBLIC
+target_link_directories(pico-Micro-ROS PUBLIC
     ${PROJECT_SOURCE_DIR}/libmicroros
 )
 
-target_link_libraries(pico-microros-uart 
+target_link_libraries(pico-Micro-ROS
     pico_stdlib 
     hardware_dma
     hardware_irq
     microros
-    freertos
+    pico-FreeRTOS
     )
 
-target_include_directories(pico-microros-uart
+target_include_directories(pico-Micro-ROS
     PUBLIC .
     PUBLIC ${PROJECT_SOURCE_DIR}/libmicroros/include
     PUBLIC ${PROJECT_SOURCE_DIR}/src/transports

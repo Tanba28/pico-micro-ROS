@@ -1,6 +1,6 @@
 add_executable(example main.cpp microros_task.cpp posix.c)
 
-target_link_libraries(example pico-microros-uart freertos pico_stdlib )
+target_link_libraries(example pico-Micro-ROS pico-FreeRTOS pico_stdlib )
 
 pico_enable_stdio_usb(example 1)
 pico_enable_stdio_uart(example 0)
