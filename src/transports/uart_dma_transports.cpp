@@ -12,32 +12,23 @@
 
 #include "task_base.hpp"
 
-UartDmaTransport *uart_dma_transports;
+UartDmaTransport *UartDmaTransport::uart_dma_transports = NULL;
+
+void UartDmaTransport::createInstance(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx){
+    if(UartDmaTransport::uart_dma_transports == NULL){
+        UartDmaTransport::uart_dma_transports = new UartDmaTransport(_uart_id,_baudrate,_gpio_tx,_gpio_rx);
+    }
+}
+UartDmaTransport* UartDmaTransport::getInstance(){
+    return UartDmaTransport::uart_dma_transports;
+}
 
 static void txDmaHandler(){
-    if(dma_hw->ints0 & 1u << uart_dma_transports->getTxDmaChan()){
-        dma_hw->ints0 = 1u << uart_dma_transports->getTxDmaChan();
-        BaseType_t higher_priority_task_woken;
-        
-        higher_priority_task_woken = pdFALSE;   
-        
-        xSemaphoreGiveFromISR(uart_dma_transports->getTxIrqSemaphor(), &higher_priority_task_woken);
-        
-        portEND_SWITCHING_ISR( higher_priority_task_woken );    
-    }
+    UartDmaTransport::getInstance()->txIrqHandler();
 }
 
 static void rxDmaHandler(){
-    if(dma_hw->ints0 & 1u << uart_dma_transports->getRxDmaChan()){
-        dma_hw->ints0 = 1u << uart_dma_transports->getRxDmaChan();
-        BaseType_t higher_priority_task_woken;
-
-        higher_priority_task_woken = pdFALSE;   
-
-        xSemaphoreGiveFromISR(uart_dma_transports->getRxIrqSemaphor(), &higher_priority_task_woken);
-
-        portEND_SWITCHING_ISR( higher_priority_task_woken );
-    } 
+    UartDmaTransport::getInstance()->rxIrqHandler();
 }
 
 UartDmaTransport::UartDmaTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx)
@@ -45,17 +36,29 @@ UartDmaTransport::UartDmaTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gp
 
 }
 
-SemaphoreHandle_t UartDmaTransport::getRxIrqSemaphor(){
-    return uart_rx_irq_semaphor;
+void UartDmaTransport::txIrqHandler(){
+    if(dma_hw->ints0 & 1u << tx_dma_chan){
+        dma_hw->ints0 = 1u << tx_dma_chan;
+        BaseType_t higher_priority_task_woken;
+        
+        higher_priority_task_woken = pdFALSE;   
+        
+        xSemaphoreGiveFromISR(tx_irq_semaphor, &higher_priority_task_woken);
+        
+        portEND_SWITCHING_ISR( higher_priority_task_woken );    
+    }
 }
-SemaphoreHandle_t UartDmaTransport::getTxIrqSemaphor(){
-    return uart_tx_irq_semaphor;
-}
-int UartDmaTransport::getRxDmaChan(){
-    return rx_dma_chan;
-}
-int UartDmaTransport::getTxDmaChan(){
-    return tx_dma_chan;
+void UartDmaTransport::rxIrqHandler(){
+    if(dma_hw->ints0 & 1u << rx_dma_chan){
+        dma_hw->ints0 = 1u << rx_dma_chan;
+        BaseType_t higher_priority_task_woken;
+
+        higher_priority_task_woken = pdFALSE;   
+
+        xSemaphoreGiveFromISR(rx_irq_semaphor, &higher_priority_task_woken);
+
+        portEND_SWITCHING_ISR( higher_priority_task_woken );
+    } 
 }
 
 bool UartDmaTransport::isInitialize(){
@@ -66,10 +69,8 @@ void UartDmaTransport::initialize(){
     gpio_set_function(gpio_tx,GPIO_FUNC_UART);
     gpio_set_function(gpio_rx,GPIO_FUNC_UART);
 
-    uart_rx_irq_semaphor = xSemaphoreCreateBinary();
-    uart_tx_irq_semaphor = xSemaphoreCreateBinary();
-    uart_rx_semaphor = xSemaphoreCreateBinary();
-    uart_tx_semaphor = xSemaphoreCreateBinary();
+    rx_irq_semaphor = xSemaphoreCreateBinary();
+    tx_irq_semaphor = xSemaphoreCreateBinary();
 
     // Tx DMA Confuguration
     tx_dma_chan = dma_claim_unused_channel(true);
@@ -78,7 +79,7 @@ void UartDmaTransport::initialize(){
     channel_config_set_transfer_data_size(&c,DMA_SIZE_8);
     channel_config_set_read_increment(&c,true);
     channel_config_set_write_increment(&c,false);
-    channel_config_set_dreq(&c,DREQ_UART0_TX);
+    channel_config_set_dreq(&c,uart_get_dreq(uart_id,true));
 
     dma_channel_configure(
         tx_dma_chan,
@@ -99,7 +100,7 @@ void UartDmaTransport::initialize(){
     channel_config_set_transfer_data_size(&c,DMA_SIZE_8);
     channel_config_set_read_increment(&c,false);
     channel_config_set_write_increment(&c,true);
-    channel_config_set_dreq(&c,DREQ_UART0_RX);
+    channel_config_set_dreq(&c,uart_get_dreq(uart_id,false));
 
     dma_channel_configure(
         rx_dma_chan,
@@ -147,7 +148,7 @@ size_t UartDmaTransport::write(const uint8_t *buf, size_t len, uint8_t *errcode)
     dma_channel_set_read_addr(tx_dma_chan,buf,false);
     dma_channel_set_trans_count(tx_dma_chan,len,true);
 
-    xSemaphoreTake(uart_tx_irq_semaphor,portMAX_DELAY);
+    xSemaphoreTake(tx_irq_semaphor,portMAX_DELAY);
 
     return len;
 }
@@ -155,6 +156,6 @@ size_t UartDmaTransport::read(uint8_t *buf, size_t len, int timeout, uint8_t *er
     dma_channel_set_write_addr(rx_dma_chan,buf,false);
     dma_channel_set_trans_count(rx_dma_chan,len,true);
 
-    xSemaphoreTake(uart_rx_irq_semaphor,pdMS_TO_TICKS(timeout));
+    xSemaphoreTake(rx_irq_semaphor,pdMS_TO_TICKS(timeout));
     return len;   
 }

@@ -9,12 +9,12 @@
 
 class UartDmaTransport : public Transport {
     public:
-        UartDmaTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx);
+        // Singleton Class
+        static void createInstance(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx);
+        static UartDmaTransport* getInstance();
 
-        SemaphoreHandle_t getRxIrqSemaphor();
-        SemaphoreHandle_t getTxIrqSemaphor();
-        int getRxDmaChan();
-        int getTxDmaChan();
+        void rxIrqHandler();
+        void txIrqHandler();
 
         bool isInitialize();
         void initialize();
@@ -27,6 +27,10 @@ class UartDmaTransport : public Transport {
         size_t read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode) override;
 
     private:
+        UartDmaTransport(uart_inst_t *_uart_id,uint _baudrate,uint _gpio_tx,uint _gpio_rx);
+
+        static UartDmaTransport *uart_dma_transports;
+
         bool init_flag = false;
 
         uart_inst_t *uart_id;
@@ -37,9 +41,7 @@ class UartDmaTransport : public Transport {
         int tx_dma_chan;
         int rx_dma_chan;
 
-        SemaphoreHandle_t uart_rx_irq_semaphor;
-        SemaphoreHandle_t uart_tx_irq_semaphor;
-        SemaphoreHandle_t uart_rx_semaphor;
-        SemaphoreHandle_t uart_tx_semaphor;
+        SemaphoreHandle_t rx_irq_semaphor;
+        SemaphoreHandle_t tx_irq_semaphor;
 };
 #endif
