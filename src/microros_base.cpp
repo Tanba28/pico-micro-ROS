@@ -1,7 +1,6 @@
 #include "microros_base.hpp"
 
 #include "pico/stdlib.h"
-#include "hardware/watchdog.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -13,8 +12,6 @@ namespace MicroRos{
 
 Context::Context(){
     // RCCHECK(rmw_uros_ping_agent(1000, 120));
-
-    watchdog_enable(3000, 1);
 
     init_options = rcl_get_zero_initialized_init_options();
     RCCHECK(rcl_init_options_init(&init_options,rcutils_get_default_allocator()));
