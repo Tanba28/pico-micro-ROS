@@ -11,17 +11,8 @@
 #include "task.h"
 #include "semphr.h"
 
-uint16_t count = 0;
-static void subCallback(const void * ros_message){
-    count++;
-    const std_msgs__msg__Int64 *msg = (const std_msgs__msg__Int64*)ros_message;
-    printf("Hello World!%d data:%d\n",count,msg->data);
-}
-
 MicroRosController::MicroRosController():
 TaskBase("microros_task",1,1024*16){
-    node = new MicroRosNode(this,"float_talker","");
-
     this->createTask();
 }
 
@@ -29,11 +20,14 @@ void MicroRosController::task(){
     uint64_t counter = 0;
     TickType_t last_wake_time;
 
+    context = new MicroRos::Context();
+    node = new MicroRosNode(context,"float_talker","");
+
     rmw_uros_sync_session(1000);
 
     last_wake_time = xTaskGetTickCount();
     for(;;){
-        watchdog_update();
+        //watchdog_update();
         
         node->nodeRun();
         if(counter%2==0){
@@ -55,7 +49,7 @@ MicroRosNode::MicroRosNode(MicroRos::Context *context,const char *node_name,cons
 
     // // Sub
     subscriber = new MicroRosSubscriber(this,"topic3",ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64));
-    subscriber->addExecutor(executor->getExecutor(),&subscriber->msg,subCallback);
+    subscriber->addExecutor(executor->getExecutor(),&subscriber->msg);
 
     // TODO:LifeCycle
     // addStateServer(executor->getExecutor());
@@ -86,6 +80,11 @@ void MicroRosPublisher::publishRun(){
 
 MicroRosSubscriber::MicroRosSubscriber(MicroRos::Node *node,const char *topic_name,const rosidl_message_type_support_t *type_support):
     MicroRos::Subscriber(node->getNode(),topic_name,type_support){
+}
+void MicroRosSubscriber::callback(const void* msg){
+    count++;
+    const std_msgs__msg__Int64 *_msg = (const std_msgs__msg__Int64*)msg;
+    printf("Hello World!%d data:%d\n",count,_msg->data);
 }
 
 MicroRosExecutor::MicroRosExecutor(MicroRos::Context *context,size_t num_handle):

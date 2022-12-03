@@ -20,11 +20,12 @@ class MicroRosPublisher;
 class MicroRosSubscriber;
 class MicroRosExecutor;
 
-class MicroRosController : public MicroRos::Context,TaskBase{
+class MicroRosController : public TaskBase{
     public:
         MicroRosController();
 
     private:
+        MicroRos::Context *context;
         MicroRosNode *node;
 
         // microRos用スレッドはひとつだけ
@@ -68,6 +69,8 @@ class MicroRosSubscriber : public MicroRos::Subscriber{
         std_msgs__msg__Int64 msg;
         
     private:
+        void callback(const void* msg) override;
+        uint16_t count = 0;
 
 };
 

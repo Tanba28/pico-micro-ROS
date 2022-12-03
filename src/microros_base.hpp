@@ -71,11 +71,12 @@ class Subscriber{
         Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
         ~Subscriber();
 
-        static void (*callback)(const void * ros_message);
-
-        void addExecutor(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback);
+        void addExecutor(rclc_executor_t *executor,void *msg);
 
     private:
+        virtual void callback(const void* msg) = 0;
+        static void callbackEntryPoint(const void* msg, void* context);
+
         rcl_subscription_t subscriber;
         rcl_subscription_options_s sub_options;
 

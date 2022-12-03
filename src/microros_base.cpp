@@ -121,15 +121,21 @@ Subscriber::Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_mes
         &sub_options
     ));
 }
-void Subscriber::addExecutor(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback){
-    RCCHECK(rclc_executor_add_subscription(
+void Subscriber::addExecutor(rclc_executor_t *executor,void *msg){
+    RCCHECK(rclc_executor_add_subscription_with_context(
         executor,
         &subscriber,
         msg,
-        callback,
+        callbackEntryPoint,
+        this,
         ON_NEW_DATA
     ));
 }
+
+void Subscriber::callbackEntryPoint(const void* msg, void* context){
+    static_cast<Subscriber*>(context)->callback(msg);
+}
+
 
 Executor::Executor(rcl_context_t *_context,size_t num_hundle)
     :context(_context){

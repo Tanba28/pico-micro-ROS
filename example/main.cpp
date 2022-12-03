@@ -20,15 +20,9 @@ int main()
     gpio_put(LED_PIN, 1);
     stdio_init_all();
 
-    // 初期設定はRTOS、DMAなし
-    UartTransport transport = UartTransport(uart0,460800);
-    (void) transport;
+    UartDmaTransport::createInstance(uart0,460800,12,13);
 
     MicroRosController microros = MicroRosController();
-
-    // DMA有効化
-    uart_dma_transports = new UartDmaTransport(uart0,460800,12,13);
-    (void) uart_dma_transports;
 
     vTaskStartScheduler();
 
