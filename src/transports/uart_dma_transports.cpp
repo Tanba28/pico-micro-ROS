@@ -107,7 +107,7 @@ void UartDmaTransport::initialize(){
         &c,
         NULL,
         &uart_get_hw(uart0)->dr,
-        0,
+        1,
         false
     );
 
@@ -153,9 +153,24 @@ size_t UartDmaTransport::write(const uint8_t *buf, size_t len, uint8_t *errcode)
     return len;
 }
 size_t UartDmaTransport::read(uint8_t *buf, size_t len, int timeout, uint8_t *errcode){
-    dma_channel_set_write_addr(rx_dma_chan,buf,false);
-    dma_channel_set_trans_count(rx_dma_chan,len,true);
+    TickType_t start_time = xTaskGetTickCount();
+    BaseType_t status;
+    for(size_t i=0;i<len;i++){
+        int64_t elapsed_time = timeout - (xTaskGetTickCount() - start_time);
+        if(elapsed_time < 0){
+            *errcode = 1;
+            return i;
+        }
 
-    xSemaphoreTake(rx_irq_semaphor,pdMS_TO_TICKS(timeout));
+        dma_channel_set_write_addr(rx_dma_chan,&buf[i],true);
+        status = xSemaphoreTake(rx_irq_semaphor,pdMS_TO_TICKS(elapsed_time));
+        if(status == pdFALSE){
+            *errcode = 1;
+            return i;
+        }
+    }
+    // dma_channel_set_write_addr(rx_dma_chan,buf,false);
+    // dma_channel_set_trans_count(rx_dma_chan,len,true);
+
     return len;   
 }

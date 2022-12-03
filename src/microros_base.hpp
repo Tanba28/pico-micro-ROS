@@ -72,6 +72,7 @@ class Subscriber{
         ~Subscriber();
 
         void addExecutor(rclc_executor_t *executor,void *msg);
+        void addExecutorStatic(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback);
 
     private:
         virtual void callback(const void* msg) = 0;

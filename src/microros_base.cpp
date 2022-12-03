@@ -131,7 +131,15 @@ void Subscriber::addExecutor(rclc_executor_t *executor,void *msg){
         ON_NEW_DATA
     ));
 }
-
+void Subscriber::addExecutorStatic(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback){
+    RCCHECK(rclc_executor_add_subscription(
+        executor,
+        &subscriber,
+        msg,
+        callback,
+        ON_NEW_DATA
+    ));
+}
 void Subscriber::callbackEntryPoint(const void* msg, void* context){
     static_cast<Subscriber*>(context)->callback(msg);
 }
