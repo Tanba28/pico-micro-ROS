@@ -11,7 +11,7 @@
 namespace MicroRos{
 
 Context::Context(){
-    // RCCHECK(rmw_uros_ping_agent(1000, 120));
+    RCCHECK(rmw_uros_ping_agent(1000, 120));
 
     init_options = rcl_get_zero_initialized_init_options();
     RCCHECK(rcl_init_options_init(&init_options,rcutils_get_default_allocator()));
