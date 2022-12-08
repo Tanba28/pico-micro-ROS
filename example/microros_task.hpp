@@ -14,7 +14,7 @@
 
 #include "task_base.hpp"
 
-class MicroRosContoller;
+class MicroRosController;
 class MicroRosNode;
 class MicroRosPublisher;
 class MicroRosSubscriber;
@@ -25,7 +25,7 @@ class MicroRosController : public TaskBase{
         MicroRosController();
 
     private:
-        MicroRos::Context *context;
+        MicroRos::Support *support;
         MicroRosNode *node;
 
         // microRos用スレッドはひとつだけ
@@ -34,10 +34,11 @@ class MicroRosController : public TaskBase{
 
 class MicroRosNode : public MicroRos::Node{
     public:
-        MicroRosNode(MicroRos::Context *context,const char *node_name,const char *name_space);
+        MicroRosNode(MicroRos::Support *support,const char *node_name,const char *name_space);
 
-        void nodeRun();
+        void process();
 
+        static MicroRosNode* _node; 
     private:
         // 使う機能を列挙する
         // 機能数制限
@@ -47,7 +48,8 @@ class MicroRosNode : public MicroRos::Node{
 
         MicroRosSubscriber * subscriber;
 
-        MicroRosExecutor *executor;
+        MicroRos::Executor *executor;
+        MicroRos::Timer *timer;
 };
 
 class MicroRosPublisher : public MicroRos::Publisher{
@@ -56,7 +58,7 @@ class MicroRosPublisher : public MicroRos::Publisher{
 
         std_msgs__msg__Int64 msg;
 
-        void publishRun();
+        void process();
         
     private:
 
@@ -74,11 +76,5 @@ class MicroRosSubscriber : public MicroRos::Subscriber{
 
 };
 
-class MicroRosExecutor : public MicroRos::Executor{
-    public:
-        MicroRosExecutor(MicroRos::Context *context,size_t num_handle);
-        
-    private:
 
-};
 #endif

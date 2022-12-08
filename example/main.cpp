@@ -1,16 +1,10 @@
 #include "pico/stdlib.h"
 #include "microros_task.hpp"
 
-#include "uart_dma_transports.hpp"
-#include "uart_transports.hpp"
-
 #include "FreeRTOS.h"
 #include "task.h"
-#include "semphr.h"
 
 const uint LED_PIN = 25;
-
-extern UartDmaTransport *uart_dma_transports;
 
 int main()
 {
@@ -19,8 +13,6 @@ int main()
 
     gpio_put(LED_PIN, 1);
     stdio_init_all();
-
-    UartDmaTransport::createInstance(uart0,460800,12,13);
 
     MicroRosController microros = MicroRosController();
 

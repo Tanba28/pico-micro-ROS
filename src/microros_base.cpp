@@ -10,29 +10,31 @@
 #define RCCHECK(ret) if(ret!=RCL_RET_OK){printf("Failed status on %d: %d\n",__LINE__,(int)ret);while(1);}
 namespace MicroRos{
 
-Context::Context(){
+/* Support --------------------------------------------------------------------------------- */
+Support::Support(){
     RCCHECK(rmw_uros_ping_agent(1000, 120));
-
-    init_options = rcl_get_zero_initialized_init_options();
-    RCCHECK(rcl_init_options_init(&init_options,rcutils_get_default_allocator()));
-
-    context = rcl_get_zero_initialized_context();
-    RCCHECK(rcl_init(0,NULL,&init_options,&context));
-    RCCHECK(rcl_init_options_fini(&init_options));
+    allocator = rcl_get_default_allocator();
+    RCCHECK(rclc_support_init(&support,0,NULL,&allocator));
 }
 
-Context::~Context(){
-    RCCHECK(rcl_context_fini(&context));
+Support::~Support(){
+    RCCHECK(rclc_support_fini(&support));
+}
+rclc_support_t* Support::getSupport(){
+    return &support;
+}
+rcl_context_t* Support::getContext(){
+    return &support.context;
+}
+rcl_clock_t* Support::getClock(){
+    return &support.clock;
 }
 
-rcl_context_t* Context::getContext(){
-    return &context;
-}
-
-Node::Node(rcl_context_t *context,const char *node_name,const char *name_space){
+/* Node --------------------------------------------------------------------------------- */
+Node::Node(Support *support,const char *node_name,const char *name_space){
     node = rcl_get_zero_initialized_node();
     node_options = rcl_node_get_default_options();
-    RCCHECK(rcl_node_init(&node,node_name,name_space,context,&node_options));
+    RCCHECK(rcl_node_init(&node,node_name,name_space,support->getContext(),&node_options));
 }
 
 Node::~Node(){
@@ -43,49 +45,12 @@ rcl_node_t* Node::getNode(){
     return &node;
 }
 
-LifeCycleNode::LifeCycleNode(rcl_context_t *context,const char *node_name,const char *name_space):
-    Node(context,node_name,name_space){
-    state_macine = rcl_lifecycle_get_zero_initialized_state_machine();
-    rcl_allocator_t allocator = rcutils_get_default_allocator();
-
-    RCCHECK(rclc_make_node_a_lifecycle_node(
-        &lifecycle_node,
-        &node,
-        &state_macine,
-        &allocator,
-        true
-    ));
-}
-
-rclc_lifecycle_node_t* LifeCycleNode::getLifeCycleNode(){
-    return &lifecycle_node;
-}
-
-void LifeCycleNode::addStateServer(rclc_executor_t *lifecycle_executor){
-    lifecycle_context.lifecycle_node = &lifecycle_node;
-    RCCHECK(rclc_lifecycle_init_get_state_server(&lifecycle_context,lifecycle_executor));
-    RCCHECK(rclc_lifecycle_init_get_available_states_server(&lifecycle_context,lifecycle_executor));
-    RCCHECK(rclc_lifecycle_init_change_state_server(&lifecycle_context,lifecycle_executor));
-}
-
-void LifeCycleNode::setConfigureCallback(int (* callback)(void)){
-    rclc_lifecycle_register_on_configure(&lifecycle_node,callback);
-}
-void LifeCycleNode::setActivateCallback(int (* callback)(void)){
-    rclc_lifecycle_register_on_activate(&lifecycle_node,callback);
-}
-void LifeCycleNode::setDeactivateCallback(int (* callback)(void)){
-    rclc_lifecycle_register_on_deactivate(&lifecycle_node,callback);
-}
-void LifeCycleNode::setCleanupCallback(int (* callback)(void)){
-    rclc_lifecycle_register_on_cleanup(&lifecycle_node,callback);
-}
-
-
-Publisher::Publisher(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
-    :node(_node){
+/* Publisher --------------------------------------------------------------------------------- */
+Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node->getNode()){
     publisher = rcl_get_zero_initialized_publisher();
     pub_options = rcl_publisher_get_default_options();
+    // pub_options.qos = rmw_qos_profile_sensor_data;
     
     RCCHECK(rcl_publisher_init(
         &publisher,
@@ -100,6 +65,10 @@ Publisher::~Publisher(){
     RCCHECK(rcl_publisher_fini(&publisher, node));
 }
 
+rcl_publisher_t* Publisher::getPublisher(){
+    return &publisher;
+}
+
 void Publisher::publish(const void *ros_message){
     rcl_ret_t ret = rcl_publish(&publisher,ros_message,NULL);
     if (ret != RCL_RET_OK){
@@ -108,8 +77,9 @@ void Publisher::publish(const void *ros_message){
     }
 }
 
-Subscriber::Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
-    :node(_node){
+/* Subscriber --------------------------------------------------------------------------------- */
+Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+    :node(_node->getNode()){
     subscriber = rcl_get_zero_initialized_subscription();
     sub_options = rcl_subscription_get_default_options();
 
@@ -121,32 +91,22 @@ Subscriber::Subscriber(rcl_node_t *_node,const char *topic_name,const rosidl_mes
         &sub_options
     ));
 }
-void Subscriber::addExecutor(rclc_executor_t *executor,void *msg){
-    RCCHECK(rclc_executor_add_subscription_with_context(
-        executor,
-        &subscriber,
-        msg,
-        callbackEntryPoint,
-        this,
-        ON_NEW_DATA
-    ));
+
+Subscriber::~Subscriber(){
+    RCCHECK(rcl_subscription_fini(&subscriber,node));
 }
-void Subscriber::addExecutorStatic(rclc_executor_t *executor,void *msg,rclc_subscription_callback_t callback){
-    RCCHECK(rclc_executor_add_subscription(
-        executor,
-        &subscriber,
-        msg,
-        callback,
-        ON_NEW_DATA
-    ));
+
+rcl_subscription_t* Subscriber::getSubscriber(){
+    return &subscriber;
 }
+
 void Subscriber::callbackEntryPoint(const void* msg, void* context){
     static_cast<Subscriber*>(context)->callback(msg);
 }
 
-
-Executor::Executor(rcl_context_t *_context,size_t num_hundle)
-    :context(_context){
+/* Executor --------------------------------------------------------------------------------- */
+Executor::Executor(Support *support,size_t num_hundle)
+    :context(support->getContext()){
     allocator = rcl_get_default_allocator();
     RCCHECK(rclc_executor_init(
         &executor,
@@ -156,11 +116,53 @@ Executor::Executor(rcl_context_t *_context,size_t num_hundle)
     ));
 }
 
+Executor::~Executor(){
+    RCCHECK(rclc_executor_fini(&executor));
+}
+
 rclc_executor_t* Executor::getExecutor(){
     return &executor;
 }
 
 void Executor::spinSome(uint64_t timeout_ns){
     rclc_executor_spin_some(&executor,timeout_ns);
+}
+
+void Executor::spin(){
+    rclc_executor_spin(&executor);
+}
+
+void Executor::addSubscriber(Subscriber *subscriber,void* msg){
+    RCCHECK(rclc_executor_add_subscription_with_context(
+        &executor,
+        subscriber->getSubscriber(),
+        msg,
+        Subscriber::callbackEntryPoint,
+        subscriber,
+        ON_NEW_DATA
+    ));
+}
+
+void Executor::addTimer(Timer *timer){
+    RCCHECK(rclc_executor_add_timer(&executor,timer->getTimer()));
+}
+
+/* Timer --------------------------------------------------------------------------------- */
+Timer::Timer(Support *support,int64_t period,void (* callback)(rcl_timer_t *, int64_t)){
+    timer = rcl_get_zero_initialized_timer();
+    RCCHECK(rclc_timer_init_default(
+        &timer,
+        support->getSupport(),
+        period,
+        callback
+    ));
+}
+
+Timer::~Timer(){
+    RCCHECK(rcl_timer_fini(&timer));
+}
+
+rcl_timer_t* Timer::getTimer(){
+    return &timer;
 }
 }
