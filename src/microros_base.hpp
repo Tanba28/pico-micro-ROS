@@ -18,7 +18,7 @@ class Timer;
 class Support{
     public:
         Support();
-        ~Support();
+        virtual ~Support();
 
         rclc_support_t* getSupport();
         rcl_context_t* getContext();
@@ -32,7 +32,7 @@ class Support{
 class Node{
     public:
         Node(Support *support,const char *node_name,const char *name_space);
-        ~Node();
+        virtual ~Node();
 
         rcl_node_t* getNode();
 
@@ -44,7 +44,7 @@ class Node{
 class Publisher{
     public:
         Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
-        ~Publisher();
+        virtual ~Publisher();
 
         rcl_publisher_t* getPublisher();
 
@@ -60,7 +60,7 @@ class Publisher{
 class Subscriber{
     public:
         Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
-        ~Subscriber();
+        virtual ~Subscriber();
 
         rcl_subscription_t* getSubscriber();
         static void callbackEntryPoint(const void* msg, void* context);
@@ -77,7 +77,7 @@ class Subscriber{
 class Executor{
     public:
         Executor(Support *support,size_t num_hundle);
-        ~Executor();
+        virtual ~Executor();
 
         rclc_executor_t* getExecutor();
         
@@ -96,7 +96,7 @@ class Executor{
 class Timer{
     public:
         Timer(Support *support,int64_t period,void (* callback)(rcl_timer_t *, int64_t));
-        ~Timer();
+        virtual ~Timer();
 
         rcl_timer_t* getTimer();
     private:
