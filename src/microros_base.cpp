@@ -46,11 +46,15 @@ rcl_node_t* Node::getNode(){
 }
 
 /* Publisher --------------------------------------------------------------------------------- */
-Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+Publisher::Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support,bool besteffort)
     :node(_node->getNode()){
     publisher = rcl_get_zero_initialized_publisher();
-    pub_options = rcl_publisher_get_default_options();
-    // pub_options.qos = rmw_qos_profile_sensor_data;
+    if(besteffort==false){
+        pub_options = rcl_publisher_get_default_options();
+    }
+    else{
+        pub_options.qos = rmw_qos_profile_sensor_data;
+    }
     
     RCCHECK(rcl_publisher_init(
         &publisher,
@@ -78,11 +82,15 @@ void Publisher::publish(const void *ros_message){
 }
 
 /* Subscriber --------------------------------------------------------------------------------- */
-Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support)
+Subscriber::Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support,bool besteffort)
     :node(_node->getNode()){
     subscriber = rcl_get_zero_initialized_subscription();
-    sub_options = rcl_subscription_get_default_options();
-
+    if(besteffort==false){
+        sub_options = rcl_subscription_get_default_options();
+    }
+    else{
+        sub_options.qos = rmw_qos_profile_sensor_data;
+    }
     RCCHECK(rcl_subscription_init(
         &subscriber,
         node,

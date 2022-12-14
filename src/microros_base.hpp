@@ -43,7 +43,7 @@ class Node{
 
 class Publisher{
     public:
-        Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+        Publisher(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support,bool besteffort = false);
         virtual ~Publisher();
 
         rcl_publisher_t* getPublisher();
@@ -59,7 +59,7 @@ class Publisher{
 
 class Subscriber{
     public:
-        Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support);
+        Subscriber(Node *_node,const char *topic_name,const rosidl_message_type_support_t *type_support,bool besteffort = false);
         virtual ~Subscriber();
 
         rcl_subscription_t* getSubscriber();
