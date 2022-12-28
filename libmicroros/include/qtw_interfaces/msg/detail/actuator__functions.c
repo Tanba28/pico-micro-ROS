@@ -12,8 +12,8 @@
 
 
 // Include directives for member types
-// Member `header`
-#include "std_msgs/msg/detail/header__functions.h"
+// Member `stamp`
+#include "builtin_interfaces/msg/detail/time__functions.h"
 
 bool
 qtw_interfaces__msg__Actuator__init(qtw_interfaces__msg__Actuator * msg)
@@ -21,8 +21,8 @@ qtw_interfaces__msg__Actuator__init(qtw_interfaces__msg__Actuator * msg)
   if (!msg) {
     return false;
   }
-  // header
-  if (!std_msgs__msg__Header__init(&msg->header)) {
+  // stamp
+  if (!builtin_interfaces__msg__Time__init(&msg->stamp)) {
     qtw_interfaces__msg__Actuator__fini(msg);
     return false;
   }
@@ -46,8 +46,8 @@ qtw_interfaces__msg__Actuator__fini(qtw_interfaces__msg__Actuator * msg)
   if (!msg) {
     return;
   }
-  // header
-  std_msgs__msg__Header__fini(&msg->header);
+  // stamp
+  builtin_interfaces__msg__Time__fini(&msg->stamp);
   // tilt_front
   // tilt_back
   // flap_front_right
@@ -67,9 +67,9 @@ qtw_interfaces__msg__Actuator__are_equal(const qtw_interfaces__msg__Actuator * l
   if (!lhs || !rhs) {
     return false;
   }
-  // header
-  if (!std_msgs__msg__Header__are_equal(
-      &(lhs->header), &(rhs->header)))
+  // stamp
+  if (!builtin_interfaces__msg__Time__are_equal(
+      &(lhs->stamp), &(rhs->stamp)))
   {
     return false;
   }
@@ -128,9 +128,9 @@ qtw_interfaces__msg__Actuator__copy(
   if (!input || !output) {
     return false;
   }
-  // header
-  if (!std_msgs__msg__Header__copy(
-      &(input->header), &(output->header)))
+  // stamp
+  if (!builtin_interfaces__msg__Time__copy(
+      &(input->stamp), &(output->stamp)))
   {
     return false;
   }

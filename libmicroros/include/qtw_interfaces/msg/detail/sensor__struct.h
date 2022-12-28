@@ -18,8 +18,8 @@ extern "C"
 // Constants defined in the message
 
 // Include directives for member types
-// Member 'header'
-#include "std_msgs/msg/detail/header__struct.h"
+// Member 'stamp'
+#include "builtin_interfaces/msg/detail/time__struct.h"
 // Member 'accel'
 // Member 'gyro'
 // Member 'mag'
@@ -28,7 +28,7 @@ extern "C"
 /// Struct defined in msg/Sensor in the package qtw_interfaces.
 typedef struct qtw_interfaces__msg__Sensor
 {
-  std_msgs__msg__Header header;
+  builtin_interfaces__msg__Time stamp;
   geometry_msgs__msg__Vector3 accel;
   geometry_msgs__msg__Vector3 gyro;
   geometry_msgs__msg__Vector3 mag;

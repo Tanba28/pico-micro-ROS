@@ -13,10 +13,10 @@
 
 
 // Include directives for member types
-// Member `header`
-#include "std_msgs/msg/header.h"
-// Member `header`
-#include "std_msgs/msg/detail/header__rosidl_typesupport_introspection_c.h"
+// Member `stamp`
+#include "builtin_interfaces/msg/time.h"
+// Member `stamp`
+#include "builtin_interfaces/msg/detail/time__rosidl_typesupport_introspection_c.h"
 // Member `accel`
 // Member `gyro`
 // Member `mag`
@@ -47,14 +47,14 @@ void qtw_interfaces__msg__Sensor__rosidl_typesupport_introspection_c__Sensor_fin
 
 static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Sensor__rosidl_typesupport_introspection_c__Sensor_message_member_array[8] = {
   {
-    "header",  // name
+    "stamp",  // name
     rosidl_typesupport_introspection_c__ROS_TYPE_MESSAGE,  // type
     0,  // upper bound of string
     NULL,  // members of sub message (initialized later)
     false,  // is array
     0,  // array size
     false,  // is upper bound
-    offsetof(qtw_interfaces__msg__Sensor, header),  // bytes offset in struct
+    offsetof(qtw_interfaces__msg__Sensor, stamp),  // bytes offset in struct
     NULL,  // default value
     NULL,  // size() function pointer
     NULL,  // get_const(index) function pointer
@@ -206,7 +206,7 @@ ROSIDL_TYPESUPPORT_INTROSPECTION_C_EXPORT_qtw_interfaces
 const rosidl_message_type_support_t *
 ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, qtw_interfaces, msg, Sensor)() {
   qtw_interfaces__msg__Sensor__rosidl_typesupport_introspection_c__Sensor_message_member_array[0].members_ =
-    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, std_msgs, msg, Header)();
+    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, builtin_interfaces, msg, Time)();
   qtw_interfaces__msg__Sensor__rosidl_typesupport_introspection_c__Sensor_message_member_array[1].members_ =
     ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, geometry_msgs, msg, Vector3)();
   qtw_interfaces__msg__Sensor__rosidl_typesupport_introspection_c__Sensor_message_member_array[2].members_ =

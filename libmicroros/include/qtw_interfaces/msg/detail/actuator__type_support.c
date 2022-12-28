@@ -13,10 +13,10 @@
 
 
 // Include directives for member types
-// Member `header`
-#include "std_msgs/msg/header.h"
-// Member `header`
-#include "std_msgs/msg/detail/header__rosidl_typesupport_introspection_c.h"
+// Member `stamp`
+#include "builtin_interfaces/msg/time.h"
+// Member `stamp`
+#include "builtin_interfaces/msg/detail/time__rosidl_typesupport_introspection_c.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -39,14 +39,14 @@ void qtw_interfaces__msg__Actuator__rosidl_typesupport_introspection_c__Actuator
 
 static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Actuator__rosidl_typesupport_introspection_c__Actuator_message_member_array[12] = {
   {
-    "header",  // name
+    "stamp",  // name
     rosidl_typesupport_introspection_c__ROS_TYPE_MESSAGE,  // type
     0,  // upper bound of string
     NULL,  // members of sub message (initialized later)
     false,  // is array
     0,  // array size
     false,  // is upper bound
-    offsetof(qtw_interfaces__msg__Actuator, header),  // bytes offset in struct
+    offsetof(qtw_interfaces__msg__Actuator, stamp),  // bytes offset in struct
     NULL,  // default value
     NULL,  // size() function pointer
     NULL,  // get_const(index) function pointer
@@ -266,7 +266,7 @@ ROSIDL_TYPESUPPORT_INTROSPECTION_C_EXPORT_qtw_interfaces
 const rosidl_message_type_support_t *
 ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, qtw_interfaces, msg, Actuator)() {
   qtw_interfaces__msg__Actuator__rosidl_typesupport_introspection_c__Actuator_message_member_array[0].members_ =
-    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, std_msgs, msg, Header)();
+    ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, builtin_interfaces, msg, Time)();
   if (!qtw_interfaces__msg__Actuator__rosidl_typesupport_introspection_c__Actuator_message_type_support_handle.typesupport_identifier) {
     qtw_interfaces__msg__Actuator__rosidl_typesupport_introspection_c__Actuator_message_type_support_handle.typesupport_identifier =
       rosidl_typesupport_introspection_c__identifier;

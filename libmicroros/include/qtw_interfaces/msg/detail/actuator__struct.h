@@ -18,13 +18,13 @@ extern "C"
 // Constants defined in the message
 
 // Include directives for member types
-// Member 'header'
-#include "std_msgs/msg/detail/header__struct.h"
+// Member 'stamp'
+#include "builtin_interfaces/msg/detail/time__struct.h"
 
 /// Struct defined in msg/Actuator in the package qtw_interfaces.
 typedef struct qtw_interfaces__msg__Actuator
 {
-  std_msgs__msg__Header header;
+  builtin_interfaces__msg__Time stamp;
   /// deg
   float tilt_front;
   /// deg
