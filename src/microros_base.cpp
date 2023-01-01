@@ -108,6 +108,55 @@ void Subscriber::callbackEntryPoint(const void* msg, void* context){
     static_cast<Subscriber*>(context)->callback(msg);
 }
 
+/* Service --------------------------------------------------------------------------------- */
+Server::Server(Node *_node,const char *service_name,const rosidl_service_type_support_t *type_support,bool besteffort)
+    :node(_node->getNode()){
+    service = rcl_get_zero_initialized_service();
+    service_options = rcl_service_get_default_options();
+    if(besteffort==true){
+        service_options.qos = rmw_qos_profile_sensor_data;
+    }
+    RCCHECK(rcl_service_init(
+        &service,
+        node,
+        type_support,
+        service_name,
+        &service_options
+    ));
+}
+Server::~Server(){
+    RCCHECK(rcl_service_fini(&service,node));
+}
+rcl_service_t* Server::getService(){
+    return &service;
+}
+void Server::callbackEntryPoint(const void *request,void *response, void* context){
+    static_cast<Server*>(context)->callback(request,response);
+}
+
+/* Client --------------------------------------------------------------------------------- */
+Client::Client(Node *_node,const char *service_name,const rosidl_service_type_support_t *type_support,bool besteffort)
+    :node(_node->getNode()){
+    client = rcl_get_zero_initialized_client();
+    options = rcl_client_get_default_options();
+    if(besteffort==true){
+        options.qos = rmw_qos_profile_sensor_data;
+    }
+    RCCHECK(rcl_client_init(
+        &client,
+        node,
+        type_support,
+        service_name,
+        &options
+    ));
+}
+Client::~Client(){
+    RCCHECK(rcl_client_fini(&client,node));
+}
+rcl_client_t* Client::getClient(){
+    return &client;
+}
+
 /* Executor --------------------------------------------------------------------------------- */
 Executor::Executor(Support *support,size_t num_hundle)
     :context(support->getContext()){
@@ -144,6 +193,26 @@ void Executor::addSubscriber(Subscriber *subscriber,void* msg){
         Subscriber::callbackEntryPoint,
         subscriber,
         ON_NEW_DATA
+    ));
+}
+
+void Executor::addServer(Server *server,void *request,void *response){
+    RCCHECK(rclc_executor_add_service_with_context(
+        &executor,
+        server->getService(),
+        request,
+        response,
+        Server::callbackEntryPoint,
+        server
+    ));
+}
+
+void Executor::addClient(Client *client,void *response,void (*callback)(const void *)){
+    RCCHECK(rclc_executor_add_client(
+        &executor,
+        client->getClient(),
+        response,
+        callback
     ));
 }
 

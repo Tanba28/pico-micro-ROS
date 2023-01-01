@@ -12,6 +12,8 @@ class Support;
 class Node;
 class Publisher;
 class Subscriber;
+class Server;
+class Client;
 class Executor;
 class Timer;
 
@@ -74,6 +76,34 @@ class Subscriber{
         rcl_node_t *node;
 };
 
+class Server{
+    public:
+        Server(Node *_node,const char *service_name,const rosidl_service_type_support_t *type_support,bool besteffort = false);
+        virtual ~Server();
+
+        rcl_service_t* getService();
+        static void callbackEntryPoint(const void *request,void *response, void* context);
+        
+    private:
+        virtual void callback(const void *request,void *response) = 0;
+
+        rcl_service_t service;
+        rcl_service_options_t service_options;
+        rcl_node_t *node;
+};
+
+class Client{
+    public:
+        Client(Node *_node,const char *service_name,const rosidl_service_type_support_t *type_support,bool besteffort = false);
+        virtual ~Client();
+
+        rcl_client_t* getClient();     
+    private:
+        rcl_client_t client;
+        rcl_client_options_t options;
+        rcl_node_t *node;
+};
+
 class Executor{
     public:
         Executor(Support *support,size_t num_hundle);
@@ -84,7 +114,9 @@ class Executor{
         void spinSome(uint64_t timeout_ns);
         void spin();
 
-        void addSubscriber(Subscriber *subscriber,void* msg);
+        void addSubscriber(Subscriber *subscriber,void *msg);
+        void addServer(Server *server,void *request,void *response);
+        void addClient(Client *client,void *response,void (*callback)(const void *));
         void addTimer(Timer *timer);
 
     private:
