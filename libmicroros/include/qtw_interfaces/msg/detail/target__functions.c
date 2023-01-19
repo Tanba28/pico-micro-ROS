@@ -14,9 +14,6 @@
 // Include directives for member types
 // Member `stamp`
 #include "builtin_interfaces/msg/detail/time__functions.h"
-// Member `pos`
-// Member `euler`
-#include "geometry_msgs/msg/detail/vector3__functions.h"
 
 bool
 qtw_interfaces__msg__Target__init(qtw_interfaces__msg__Target * msg)
@@ -29,21 +26,14 @@ qtw_interfaces__msg__Target__init(qtw_interfaces__msg__Target * msg)
     qtw_interfaces__msg__Target__fini(msg);
     return false;
   }
-  // pos
-  if (!geometry_msgs__msg__Vector3__init(&msg->pos)) {
-    qtw_interfaces__msg__Target__fini(msg);
-    return false;
-  }
-  // euler
-  if (!geometry_msgs__msg__Vector3__init(&msg->euler)) {
-    qtw_interfaces__msg__Target__fini(msg);
-    return false;
-  }
-  // tilt
   // value_1
   // value_2
   // value_3
   // value_4
+  // value_5
+  // value_6
+  // value_7
+  // value_8
   return true;
 }
 
@@ -55,15 +45,14 @@ qtw_interfaces__msg__Target__fini(qtw_interfaces__msg__Target * msg)
   }
   // stamp
   builtin_interfaces__msg__Time__fini(&msg->stamp);
-  // pos
-  geometry_msgs__msg__Vector3__fini(&msg->pos);
-  // euler
-  geometry_msgs__msg__Vector3__fini(&msg->euler);
-  // tilt
   // value_1
   // value_2
   // value_3
   // value_4
+  // value_5
+  // value_6
+  // value_7
+  // value_8
 }
 
 bool
@@ -76,22 +65,6 @@ qtw_interfaces__msg__Target__are_equal(const qtw_interfaces__msg__Target * lhs, 
   if (!builtin_interfaces__msg__Time__are_equal(
       &(lhs->stamp), &(rhs->stamp)))
   {
-    return false;
-  }
-  // pos
-  if (!geometry_msgs__msg__Vector3__are_equal(
-      &(lhs->pos), &(rhs->pos)))
-  {
-    return false;
-  }
-  // euler
-  if (!geometry_msgs__msg__Vector3__are_equal(
-      &(lhs->euler), &(rhs->euler)))
-  {
-    return false;
-  }
-  // tilt
-  if (lhs->tilt != rhs->tilt) {
     return false;
   }
   // value_1
@@ -108,6 +81,22 @@ qtw_interfaces__msg__Target__are_equal(const qtw_interfaces__msg__Target * lhs, 
   }
   // value_4
   if (lhs->value_4 != rhs->value_4) {
+    return false;
+  }
+  // value_5
+  if (lhs->value_5 != rhs->value_5) {
+    return false;
+  }
+  // value_6
+  if (lhs->value_6 != rhs->value_6) {
+    return false;
+  }
+  // value_7
+  if (lhs->value_7 != rhs->value_7) {
+    return false;
+  }
+  // value_8
+  if (lhs->value_8 != rhs->value_8) {
     return false;
   }
   return true;
@@ -127,20 +116,6 @@ qtw_interfaces__msg__Target__copy(
   {
     return false;
   }
-  // pos
-  if (!geometry_msgs__msg__Vector3__copy(
-      &(input->pos), &(output->pos)))
-  {
-    return false;
-  }
-  // euler
-  if (!geometry_msgs__msg__Vector3__copy(
-      &(input->euler), &(output->euler)))
-  {
-    return false;
-  }
-  // tilt
-  output->tilt = input->tilt;
   // value_1
   output->value_1 = input->value_1;
   // value_2
@@ -149,6 +124,14 @@ qtw_interfaces__msg__Target__copy(
   output->value_3 = input->value_3;
   // value_4
   output->value_4 = input->value_4;
+  // value_5
+  output->value_5 = input->value_5;
+  // value_6
+  output->value_6 = input->value_6;
+  // value_7
+  output->value_7 = input->value_7;
+  // value_8
+  output->value_8 = input->value_8;
   return true;
 }
 

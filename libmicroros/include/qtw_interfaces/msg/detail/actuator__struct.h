@@ -25,28 +25,18 @@ extern "C"
 typedef struct qtw_interfaces__msg__Actuator
 {
   builtin_interfaces__msg__Time stamp;
-  /// deg
-  float tilt_front;
-  /// deg
-  float tilt_back;
-  /// deg
-  float flap_front_right;
-  /// deg
-  float flap_front_left;
-  /// deg
-  float flap_back_right;
-  /// deg
-  float flap_back_left;
-  /// deg
-  float rudder;
-  /// N
-  float thrust_front_right;
-  /// N
-  float thrust_front_left;
-  /// N
-  float thrust_back_right;
-  /// N
-  float thrust_back_left;
+  /// 0 - 2147(11 bit)
+  uint16_t tilt_front;
+  uint16_t tilt_back;
+  uint16_t flap_front_right;
+  uint16_t flap_front_left;
+  uint16_t flap_back_right;
+  uint16_t flap_back_left;
+  uint16_t rudder;
+  uint16_t thrust_front_right;
+  uint16_t thrust_front_left;
+  uint16_t thrust_back_right;
+  uint16_t thrust_back_left;
 } qtw_interfaces__msg__Actuator;
 
 // Struct for a sequence of qtw_interfaces__msg__Actuator.

@@ -57,7 +57,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "tilt_front",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -74,7 +74,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "tilt_back",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -91,7 +91,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "flap_front_right",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -108,7 +108,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "flap_front_left",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -125,7 +125,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "flap_back_right",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -142,7 +142,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "flap_back_left",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -159,7 +159,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "rudder",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -176,7 +176,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "thrust_front_right",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -193,7 +193,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "thrust_front_left",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -210,7 +210,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "thrust_back_right",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array
@@ -227,7 +227,7 @@ static rosidl_typesupport_introspection_c__MessageMember qtw_interfaces__msg__Ac
   },
   {
     "thrust_back_left",  // name
-    rosidl_typesupport_introspection_c__ROS_TYPE_FLOAT,  // type
+    rosidl_typesupport_introspection_c__ROS_TYPE_UINT16,  // type
     0,  // upper bound of string
     NULL,  // members of sub message
     false,  // is array

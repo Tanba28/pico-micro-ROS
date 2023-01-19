@@ -20,21 +20,19 @@ extern "C"
 // Include directives for member types
 // Member 'stamp'
 #include "builtin_interfaces/msg/detail/time__struct.h"
-// Member 'pos'
-// Member 'euler'
-#include "geometry_msgs/msg/detail/vector3__struct.h"
 
 /// Struct defined in msg/Target in the package qtw_interfaces.
 typedef struct qtw_interfaces__msg__Target
 {
   builtin_interfaces__msg__Time stamp;
-  geometry_msgs__msg__Vector3 pos;
-  geometry_msgs__msg__Vector3 euler;
-  float tilt;
   uint16_t value_1;
   uint16_t value_2;
   uint16_t value_3;
   uint16_t value_4;
+  uint16_t value_5;
+  uint16_t value_6;
+  uint16_t value_7;
+  uint16_t value_8;
 } qtw_interfaces__msg__Target;
 
 // Struct for a sequence of qtw_interfaces__msg__Target.
