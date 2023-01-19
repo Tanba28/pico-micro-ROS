@@ -12,7 +12,7 @@ namespace MicroRos{
 
 /* Support --------------------------------------------------------------------------------- */
 Support::Support(){
-    RCCHECK(rmw_uros_ping_agent(1000, 120));
+    RCCHECK(rmw_uros_ping_agent(2000, 240));
     allocator = rcl_get_default_allocator();
     RCCHECK(rclc_support_init(&support,0,NULL,&allocator));
 }
