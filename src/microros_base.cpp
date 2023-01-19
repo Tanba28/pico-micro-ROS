@@ -6,7 +6,7 @@
 MicroRosNode::MicroRosNode(const char *node_name,const char *name_space){
     allocator = rcl_get_default_allocator();
 
-    rcl_ret_t ret = rmw_uros_ping_agent(1000, 120);
+    rcl_ret_t ret = rmw_uros_ping_agent(2000, 240);
 
     if (ret != RCL_RET_OK)
     {
